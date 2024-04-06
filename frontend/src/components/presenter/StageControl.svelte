@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { clipboard } from '@skeletonlabs/skeleton';
+  import {
+    clipboard,
+    modalStore,
+    type ModalSettings,
+  } from '@skeletonlabs/skeleton';
   import Icon from '@iconify/svelte';
   import { stage } from '../../stores/presenterStore';
   import { StreamingAPIConnection, Symbl } from '@symblai/symbl-web-sdk';
@@ -7,6 +11,7 @@
   import { Socket, io } from 'socket.io-client';
   import type { DefaultEventsMap } from '@socket.io/component-emitter';
   import { SOCKET_URL } from '../../const';
+  import Question from '../responder/Question.svelte';
 
   let link = 'http://localhost:3500/';
   let roomId = '';
@@ -14,6 +19,14 @@
   let timer: number;
   let transcriptBatch = '';
   let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
+
+  interface Question {
+    id: string;
+    question: string;
+    room: string;
+    correct_response_index: number;
+    answers: string[];
+  }
 
   async function startTranscript() {
     $stage = 'loading';
@@ -24,11 +37,8 @@
       console.log('room opened', data);
       handleRoomOpened(data.room);
     });
-    socket.on('question_generated', (data) => {
-      console.log(
-        '-------------------- question generated -------------',
-        data
-      );
+    socket.on('question_generated', (data: Question) => {
+      handleGeneratedQuestion(data);
     });
     socket.on('connect', function () {
       socket?.emit('open_room');
@@ -68,6 +78,27 @@
       console.error('Transcript api error: ', e);
       $stage = 'idle';
     }
+  }
+
+  async function handleGeneratedQuestion(question: Question) {
+    const modal: ModalSettings = {
+      type: 'confirm',
+      title: 'Confirm question to ask',
+      body: `Question: <br>
+    ${question.question}<br>
+    Answers:<br>
+    a) ${question.answers[0]} ${question.correct_response_index === 0 ? '(correct)' : ''}<br>
+    b) ${question.answers[1]} ${question.correct_response_index === 1 ? '(correct)' : ''}<br>
+    c) ${question.answers[2]} ${question.correct_response_index === 2 ? '(correct)' : ''}<br>
+    d) ${question.answers[3]} ${question.correct_response_index === 3 ? '(correct)' : ''}
+    `,
+      response: (r: boolean) => {
+        if (!r) return;
+        socket?.emit('confirm_question', { id: question.id });
+      },
+    };
+
+    modalStore.trigger(modal);
   }
 
   async function handleRoomOpened(_roomId: string) {

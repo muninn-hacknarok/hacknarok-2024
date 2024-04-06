@@ -23,7 +23,6 @@
     });
 
     state.respondentSocket?.on('question', (data: QuestionEventData) => {
-      console.log('question received', data);
       $currentQuestion = data;
       $respondentStage = 'answering';
     });

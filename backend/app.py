@@ -2,6 +2,7 @@ from flask import Flask
 from flask_socketio import SocketIO, join_room
 
 import chat
+import uuid
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -33,6 +34,7 @@ def join_room_func(json):
     print('received json: ' + str(json))
     join_room(json['room'])
     people_in_rooms[json['room']].append(json['name'])
+    socketio.emit('joined_room', {"room": json['room']})
 
 
 @socketio.on('send_question')
@@ -42,7 +44,7 @@ def send_question(json):
     question = chat.prompt_chat(transcription)
     if question is None:
         return
-    question.id = generate_random_code()
+    question.id = str(uuid.uuid4())
     question.room = json['room']
     questions[question.id] = question
     socketio.emit('question_generated', question.to_dict())
@@ -64,4 +66,4 @@ def response(json):
 
 
 if __name__ == '__main__':
-    socketio.run(app, allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', allow_unsafe_werkzeug=True)

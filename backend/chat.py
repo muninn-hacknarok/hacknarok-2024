@@ -41,11 +41,10 @@ class Question:
 
 
 def prompt_chat(transcript: [str]) -> Question:
-
     transcript_string = "\n".join(transcript)
-    query_string = ("SYSTEM: Create a simple nad short quiz with a question and four answers (up to 15 words) about the content of the following text: \n\n" +
-                    f"TEXT: {transcript_string} \n\n" +
-                    "QUESTION formated as json {'question': ..., 'answers': ['...', '...', '...', '...'], 'correct_index': ...}")
+
+    query_string = get_file_content_as_string("prompt.txt")
+    query_string = query_string.replace("[TEXT]", transcript_string)
     output = query({
         "inputs": query_string,
         "parameters": {
@@ -66,3 +65,9 @@ def prompt_chat(transcript: [str]) -> Question:
     except Exception:
         print("FAILED JSON")
         return None
+
+
+def get_file_content_as_string(file_path):
+    with open(file_path, 'r') as file:
+        content = file.read()
+    return content

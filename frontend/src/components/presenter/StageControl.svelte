@@ -12,7 +12,7 @@
   let roomId = '';
   let connection: StreamingAPIConnection;
   let timer: number;
-  let transcriptBatch = '';
+  export let transcriptBatch = '';
   let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
   async function startTranscript() {

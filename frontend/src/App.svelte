@@ -12,8 +12,12 @@
   import { AppShell } from '@skeletonlabs/skeleton';
 
   import Home from './components/pages/Home.svelte';
+  import { Modal, modalStore } from '@skeletonlabs/skeleton';
+  import type { ModalSettings, ModalComponent } from '@skeletonlabs/skeleton';
+  import Responder from './components/pages/Responder.svelte';
 </script>
 
+<Modal />
 <Router>
   <AppShell>
     <svelte:fragment slot="header">
@@ -26,6 +30,9 @@
 
     <Route path="/" component={Home} />
 
+    <Route path="/:code" let:params>
+      <Responder code={params.code} />
+    </Route>
     <!-- <PrivateRoute path="/tournaments/new">
       <NewTournament />
     </PrivateRoute>

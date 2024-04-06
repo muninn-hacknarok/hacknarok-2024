@@ -24,6 +24,12 @@
       console.log('room opened', data);
       handleRoomOpened(data.room);
     });
+    socket.on('question_generated', (data) => {
+      console.log(
+        '-------------------- question generated -------------',
+        data
+      );
+    });
     socket.on('connect', function () {
       socket?.emit('open_room');
     });

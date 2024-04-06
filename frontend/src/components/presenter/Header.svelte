@@ -1,7 +1,13 @@
-<div class="flex space-x-3 items-center justify-center mt-6 mb-3">
-  <h1 class="text-[40px] outline-none">Muninn</h1>
-  <img class="w-10 h-10" src="assets/white_raven.png" alt="" />
+<script lang="ts">
+  import { isDarkTheme } from '../../stores/globalStore';
+</script>
+
+<div class="flex justify-center my-6">
+  <img
+    class="w-96"
+    src={$isDarkTheme
+      ? 'assets/logo_dark_theme.png'
+      : 'assets/logo_light_theme.png'}
+    alt=""
+  />
 </div>
-<h4 class="text-center mb-6">
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-</h4>

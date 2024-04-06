@@ -1,0 +1,5 @@
+import chat
+
+transc = ["Gather, warriors, and heed Odin's wisdom in our quest to plunder villages. Under the shroud of darkness, we advance silently, using the land to mask our approach. Swift and precise, we descend upon our targets, seizing riches and captives alike. Discipline amidst chaos is our creed; every action deliberate, every movement calculated.\nBut remember, our strength lies not only in brute force but in cunning strategy. Strike where they least expect, exploit their vulnerabilities. Leave no trace of our presence but the echo of our conquests. As we retreat, let it be a tactical withdrawal, preserving our forces for the battles ahead.\nOur raids are not mere acts of violence; they are rituals, offerings to the Allfather. Honor his will by executing each raid with precision and purpose. Let our enemies tremble at the mention of our name, for we are the instruments of Odin's divine retribution.\nSo, my fellow Vikings, let us embark on this journey with courage in our hearts and steel in our hands. May our raids be swift, our spoils plentiful, and our glory everlasting in the annals of history."]
+
+print(chat.prompt_chat_2(transc))

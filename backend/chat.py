@@ -1,8 +1,6 @@
 import json
-
 import requests
 
-#API_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1"
 API_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1"
 headers = {"Authorization": "Bearer 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"}
 
@@ -48,8 +46,8 @@ def prompt_chat(transcript: [str]) -> Question:
     output = query({
         "inputs": query_string,
         "parameters": {
-            "max_length": 1000,
-            "max_new_tokens": 500,
+            "max_length": 2000,
+            "max_new_tokens": 1000,
             "return_full_text": False,
             "num_return_sequences": 3,
         },
@@ -59,11 +57,14 @@ def prompt_chat(transcript: [str]) -> Question:
     })
     print(query_string + "\n---\n" + output[0]['generated_text'])
 
+    json_string = "{" + output[0]['generated_text']
+    json_string = json_string.split("}", 1)[0] + "}"
+
     try:
-        di = json.JSONDecoder().decode("{" + output[0]['generated_text'])
+        di = json.JSONDecoder().decode(json_string)
         return Question(di['question'], di['answers'], di['correct_index'])
     except Exception:
-        print("FAILED JSON")
+        print("FAILED JSON : " + json_string)
         return None
 
 

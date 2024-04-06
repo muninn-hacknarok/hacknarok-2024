@@ -1,9 +1,9 @@
-[INST]TIPS: Do NOT use word transcription in the question
-SYSTEM: Create a simple and short quiz with a question and four answers (up to 15 words) 1 correct and 3 wrong about the content of the following transcription to check someone's attention:
+[INST]
+SYSTEM: Create a simple and short quiz with a question and four answers (up to 10 words each 1 correct and 3 wrong but realistic sounding), about the content of the following text.
+The goal of the quiz is to test the listener's attention to the text and their ability to remember the details. Avoid referring to text just ask the question.
 
-TRANSCRIPTION: [TEXT]
+TEXT: [TEXT]
 
-QUESTION formatted as json {"question": ..., "answers": ["...", "...", "...", "..."], "correct_index": ...}
-
+QUESTION formatted as json {"question": "...", "answers": ["...", "...", "...", "..."], "correct_index": ...}:
 [/INST]
 {

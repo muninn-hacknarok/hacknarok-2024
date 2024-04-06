@@ -57,10 +57,10 @@ def prompt_chat(transcript: [str]) -> Question:
             "wait_for_model": True
         }
     })
-    print(query_string + "\n---" + output[0]['generated_text'])
+    print(query_string + "\n---\n" + output[0]['generated_text'])
 
     try:
-        di = json.JSONDecoder().decode(output[0]['generated_text'])
+        di = json.JSONDecoder().decode("{" + output[0]['generated_text'])
         return Question(di['question'], di['answers'], di['correct_index'])
     except Exception:
         print("FAILED JSON")

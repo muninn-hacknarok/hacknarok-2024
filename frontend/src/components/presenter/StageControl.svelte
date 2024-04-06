@@ -12,12 +12,15 @@
   let roomId = '';
   let connection: StreamingAPIConnection;
   let timer: number;
+  export let customQuestionInterval = 60;
   export let transcriptBatch = '';
+  export let currentPendingSentence = ''
   let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
   async function startTranscript() {
     $stage = 'loading';
     transcriptBatch = '';
+    currentPendingSentence = ''
 
     socket = io(SOCKET_URL);
     socket.on('room_opened', (data) => {
@@ -53,16 +56,20 @@
         const name = speechData.user ? speechData.user.name : 'User';
         const transcript = speechData.punctuated.transcript;
         // console.log(`${name}: `, speechData);
+        console.log(transcript)
         if (speechData.isFinal) {
           console.log(transcript);
           transcriptBatch += transcript + ' ';
+        } else {
+          currentPendingSentence = transcript;
         }
       });
 
-      const questionInterval = 1000 * 60;
+      const questionInterval = 1000 * customQuestionInterval;
       timer = setInterval(() => {
         sendBatch();
         transcriptBatch = '';
+        currentPendingSentence = ''
       }, questionInterval);
     } catch (e) {
       console.error('Transcript api error: ', e);

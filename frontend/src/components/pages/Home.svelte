@@ -8,6 +8,8 @@
   import { isDarkTheme } from '../../stores/globalStore';
   import { stage } from '../../stores/presenterStore';
   let transcriptBatch = ""
+  let currentPendingSentence = ""
+  let customQuestionInterval = 60
 </script>
 
 <div class="absolute top-4 right-4">
@@ -19,11 +21,12 @@
 <div class="flex flex-col">
     <div class="flex flex-row">
         {#if $stage == "recording"}
-            <Transcript transcript={transcriptBatch}/>
+            <Transcript transcript={transcriptBatch+currentPendingSentence}/>
         {:else}
             <Instructions />
         {/if}
-        <StageControl bind:transcriptBatch/>
+        <input bind:value={customQuestionInterval} />
+        <StageControl bind:transcriptBatch bind:currentPendingSentence bind:customQuestionInterval/>
     </div>
     <QuestionOverview />
 </div>

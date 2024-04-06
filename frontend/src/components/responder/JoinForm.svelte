@@ -39,7 +39,6 @@
 <div class="flex flex-col items-center mt-10">
   <label class="label mb-3">
     <span>Your name</span>
-    {$respondentName}
     <input
       class="input"
       type="text"

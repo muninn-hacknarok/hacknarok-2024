@@ -11,8 +11,13 @@
   let progressColor = 'green';
 
   const seconds = 10;
+  let startTime = Date.now();
   let intervalId: number | null = setInterval(() => {
-    progress = Math.min(progress + 100 / seconds / 100, 100);
+    // progress = Math.min(progress + 100 / seconds / 100, 100);
+    progress = Math.min(
+      ((Date.now() - startTime) / (seconds * 1000)) * 100,
+      100
+    );
     if (progress < 33) progressColor = 'green';
     else if (progress < 66) progressColor = 'yellow';
     else progressColor = 'red';

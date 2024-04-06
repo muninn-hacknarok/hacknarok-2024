@@ -9,6 +9,8 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 questions = {}
 
+people_in_rooms = {}
+
 
 def generate_random_code():
     import random
@@ -20,6 +22,7 @@ def generate_random_code():
 def open_room():
     code = generate_random_code()
     print('opened room: ' + code)
+    people_in_rooms[code] = []
     join_room(code)
     join_room(code + "-private")
     socketio.emit('room_opened', {"room": code})
@@ -29,6 +32,7 @@ def open_room():
 def join_room_func(json):
     print('received json: ' + str(json))
     join_room(json['room'])
+    people_in_rooms[json['room']].append(json['name'])
 
 
 @socketio.on('send_question')
@@ -36,6 +40,8 @@ def send_question(json):
     print("question to room: " + json['room'])
     transcription = json['transcription']
     question = chat.prompt_chat(transcription)
+    if question is None:
+        return
     question.id = generate_random_code()
     question.room = json['room']
     questions[question.id] = question
@@ -53,9 +59,9 @@ def send_question(json):
 def response(json):
     print("response to question : " + json['id'])
     question = questions[json['id']]
-    question.responses.append(json['response'])
-    socketio.emit('new_response', question.to_dict(), room=question.room + "-private")
+    question.responses.append((json['response'], json['name']))
+    socketio.emit('new_response', {"id": json['id'], "response": json['response'], "name": json['name']}, room=question.room + "-private")
 
 
 if __name__ == '__main__':
-    socketio.run(app)
+    socketio.run(app, allow_unsafe_werkzeug=True)

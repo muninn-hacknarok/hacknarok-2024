@@ -4,15 +4,30 @@
   import { stage } from '../../stores/presenterStore';
   import { StreamingAPIConnection, Symbl } from '@symblai/symbl-web-sdk';
   import { ProgressRadial } from '@skeletonlabs/skeleton';
+  import { Socket, io } from 'socket.io-client';
+  import type { DefaultEventsMap } from '@socket.io/component-emitter';
+  import { SOCKET_URL } from '../../const';
 
-  const link = 'https://muninn.com/5GHI83';
+  let link = 'http://localhost:3500/';
+  let roomId = '';
   let connection: StreamingAPIConnection;
-  let timer = null;
+  let timer: number;
   let transcriptBatch = '';
+  let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
   async function startTranscript() {
     $stage = 'loading';
     transcriptBatch = '';
+
+    socket = io(SOCKET_URL);
+    socket.on('room_opened', (data) => {
+      console.log('room opened', data);
+      handleRoomOpened(data.room);
+    });
+    socket.on('connect', function () {
+      socket?.emit('open_room');
+    });
+
     try {
       // Symbl recommends replacing the App ID and App Secret with an Access Token for authentication in production applications.
       // For more information about authentication see https://docs.symbl.ai/docs/developer-tools/authentication/.
@@ -39,18 +54,35 @@
       });
 
       const questionInterval = 1000 * 60;
-      timer = setInterval(() => {}, questionInterval);
-
-      $stage = 'recording';
+      timer = setInterval(() => {
+        sendBatch();
+        transcriptBatch = '';
+      }, questionInterval);
     } catch (e) {
       console.error('Transcript api error: ', e);
       $stage = 'idle';
     }
   }
 
+  async function handleRoomOpened(_roomId: string) {
+    roomId = _roomId;
+    $stage = 'recording';
+  }
+
+  async function sendBatch() {
+    console.log('sending batch', transcriptBatch);
+    socket?.emit('send_question', {
+      room: roomId,
+      transcription: [transcriptBatch],
+    });
+  }
+
   async function stopTranscript() {
     await connection?.stopProcessing();
     connection?.disconnect();
+    if (timer) {
+      clearInterval(timer);
+    }
     $stage = 'idle';
   }
 </script>
@@ -94,8 +126,8 @@
         <div
           class="card flex items-center justify-between variant-soft-primary px-4"
         >
-          <p>{link}</p>
-          <button use:clipboard={link} type="button" class="btn-icon"
+          <p>{link}{roomId}</p>
+          <button use:clipboard={link + roomId} type="button" class="btn-icon"
             ><Icon icon="ph:copy" /></button
           >
         </div>

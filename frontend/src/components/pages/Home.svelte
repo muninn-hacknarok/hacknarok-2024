@@ -14,4 +14,5 @@
 <div class="flex">
   <Instructions />
   <StageControl />
+  <QuestionOverview />
 </div>

@@ -3,6 +3,11 @@ from flask_socketio import SocketIO, join_room
 
 import chat
 import uuid
+import logging
+
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -35,7 +40,7 @@ def join_room_func(json):
     join_room(json['room'])
     people_in_rooms[json['room']].append(json['name'])
     socketio.emit('joined_room', {"room": json['room']}, to=request.sid)
-
+    socketio.emit('user_joined', {"name": json['name']}, to=json['room'] + "-private")
 
 @socketio.on('send_question')
 def send_question(json):

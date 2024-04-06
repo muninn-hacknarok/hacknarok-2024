@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+    var socket = io("ws://127.0.0.1:5000/", {});
+    socket.on('connect', function() {
+        socket.emit('open_room');
+    });
+
+    socket.on("room_opened", (data) => {
+        console.log("room_opened", data);
+        socket.emit('send_question', {
+            "room": data.room,
+            "transcription": [
+                "lorem ipsum dolor sit amet",
+                "consectetur adipiscing elit",
+                "sed do eiusmod tempor incididunt",
+                "ut labore et dolore magna aliqua",
+                "ut enim ad minim veniam",
+                "quis nostrud exercitation ullamco laboris",
+            ]
+        });
+    });
+
+    socket.on("question_generated", (data) => {
+        console.log("question_generated", data);
+        socket.emit('confirm_question', {
+            "id": data.id
+        });
+    });
+
+    socket.on("question", (data) => {
+        console.log("question", data);
+        socket.emit('response', {
+            "id": data.id,
+            "response": 1
+        });
+        socket.emit('response', {
+            "id": data.id,
+            "response": 2
+        });
+    });
+
+    socket.on("new_response", (data) => {
+        console.log("new_response", data.responses);
+    });
+    </script>
+</head>
+<body>
+
+</body>
+</html>

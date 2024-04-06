@@ -31,7 +31,7 @@
     state.respondentSocket?.on('connect', () => {
       state.respondentSocket?.emit('join_room', {
         room: roomId,
-        name,
+        name: $respondentName,
       });
     });
   }

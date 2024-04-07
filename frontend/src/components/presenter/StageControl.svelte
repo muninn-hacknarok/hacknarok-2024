@@ -22,6 +22,7 @@
   let roomId = '';
   let connection: StreamingAPIConnection;
   let questionIntervalTimer: number;
+  let timerIntervalTimer: number;
   export let customQuestionInterval: number;
   export let transcriptBatch = '';
   export let currentPendingSentence = '';
@@ -45,7 +46,7 @@
 
   async function startTranscript() {
     startTime = Date.now();
-    setInterval(() => {
+    timerIntervalTimer = setInterval(() => {
       $timer = Math.round((Date.now() - startTime) / 1000);
     }, 1000);
     console.log('start transcript');
@@ -219,7 +220,13 @@
     connection?.disconnect();
     if (questionIntervalTimer) {
       clearInterval(questionIntervalTimer);
+      questionIntervalTimer = 0;
     }
+    if (timerIntervalTimer) {
+      clearInterval(timerIntervalTimer);
+      timerIntervalTimer = 0;
+    }
+    $timer = 0;
     $stage = 'idle';
   }
 

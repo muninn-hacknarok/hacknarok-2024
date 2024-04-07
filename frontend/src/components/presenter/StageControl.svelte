@@ -9,6 +9,7 @@
     connectedUsers,
     stage,
     storedQuestions,
+    timer,
   } from '../../stores/presenterStore';
   import { StreamingAPIConnection, Symbl } from '@symblai/symbl-web-sdk';
   import { ProgressRadial } from '@skeletonlabs/skeleton';
@@ -20,12 +21,13 @@
   let link = 'http://localhost:3500/';
   let roomId = '';
   let connection: StreamingAPIConnection;
-  let timer: number;
-  export let customQuestionInterval = 30;
+  let questionIntervalTimer: number;
+  export let customQuestionInterval: number;
   export let transcriptBatch = '';
   export let currentPendingSentence = '';
   let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   let autoConfirm = false;
+  let startTime: number;
 
   interface Question {
     id: string;
@@ -42,6 +44,10 @@
   }
 
   async function startTranscript() {
+    startTime = Date.now();
+    setInterval(() => {
+      $timer = Math.round((Date.now() - startTime) / 1000);
+    }, 1000);
     console.log('start transcript');
     $stage = 'loading';
     transcriptBatch = '';
@@ -97,7 +103,7 @@
       });
 
       const questionInterval = 1000 * customQuestionInterval;
-      timer = setInterval(() => {
+      questionIntervalTimer = setInterval(() => {
         if (transcriptBatch.length < 120) return;
         sendBatch();
         transcriptBatch = '';
@@ -211,8 +217,8 @@
   async function stopTranscript() {
     await connection?.stopProcessing();
     connection?.disconnect();
-    if (timer) {
-      clearInterval(timer);
+    if (questionIntervalTimer) {
+      clearInterval(questionIntervalTimer);
     }
     $stage = 'idle';
   }

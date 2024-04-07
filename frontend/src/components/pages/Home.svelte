@@ -6,15 +6,19 @@
   import QuestionOverview from '../presenter/QuestionOverview.svelte';
   import Header from '../presenter/Header.svelte';
   import { isDarkTheme } from '../../stores/globalStore';
-  import { stage } from '../../stores/presenterStore';
+  import { stage, timer } from '../../stores/presenterStore';
   let transcriptBatch = '';
   let currentPendingSentence = '';
-  let customQuestionInterval = 60;
+  let customQuestionInterval = 30; // 6-7 seconds shift
 </script>
 
 <div class="absolute top-4 right-4">
   <LightSwitch on:click={() => ($isDarkTheme = !$isDarkTheme)} />
 </div>
+
+<!-- <div class="absolute top-4 left-4">
+  <span>{$timer}s</span>
+</div> -->
 
 <Header />
 

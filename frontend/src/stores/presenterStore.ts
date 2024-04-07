@@ -20,3 +20,5 @@ export interface StoredQuestion {
 export const storedQuestions = writable<Record<string, StoredQuestion>>({});
 
 export const connectedUsers = writable<string[]>([]);
+
+export const timer = writable<number>(0);

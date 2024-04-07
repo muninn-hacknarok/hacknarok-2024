@@ -32,9 +32,11 @@
   {#if questions.length > 0}
     <div class="flex flex-col flex-1 justify-center mx-16 mb-6">
       {#each questions as { question, wrongAnswers, goodAnswers }}
-        <div class="flex my-2 items-center">
+        <div
+          class="flex flex-col md:flex-row mb-9 md:mb-2 my-2 items-stretch md:items-center"
+        >
           <span class="flex flex-1 mr-2">{question}</span>
-          <div class="flex flex-col items-end flex-1 ml-4">
+          <div class="flex flex-col items-end flex-1 ml-0 md:ml-4">
             <span class="text-sm mb-1 mr-1"
               >{goodAnswers.length} / {goodAnswers.length +
                 wrongAnswers.length}</span
@@ -51,6 +53,6 @@
       {/each}
     </div>
   {:else if $stage === 'recording'}
-    <p class="text-center mt-8">There is no questions yet</p>
+    <p class="text-center mt-8 mb-4">There is no questions yet</p>
   {/if}
 </div>

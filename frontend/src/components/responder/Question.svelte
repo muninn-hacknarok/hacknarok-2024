@@ -72,7 +72,9 @@
   </h2>
 </div>
 
-<div class="flex space-x-6 max-w-4xl mx-auto px-4">
+<div
+  class="flex space-x-3 md:space-x-6 max-w-4xl mx-auto px-4 text-sm md:text-base"
+>
   <div
     on:click={() => answerQuestion(0)}
     class="bg-red-600 rounded-2xl h-24 flex-1 flex items-center px-4 cursor-pointer hover:bg-red-800"
@@ -90,7 +92,7 @@
     </span>
   </div>
 </div>
-<div class="flex space-x-6 max-w-4xl mx-auto px-4 mt-4">
+<div class="flex space-x-3 md:space-x-6 max-w-4xl mx-auto px-4 mt-4">
   <div
     on:click={() => answerQuestion(2)}
     class="bg-yellow-500 rounded-2xl h-24 flex-1 flex items-center px-4 cursor-pointer hover:bg-yellow-700 text-white hover:text-gray-300"

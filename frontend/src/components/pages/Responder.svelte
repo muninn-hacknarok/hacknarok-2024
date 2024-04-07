@@ -10,8 +10,10 @@
   export let code: string | null = null;
 </script>
 
-<div class="absolute top-4 right-4">
-  <LightSwitch on:click={() => ($isDarkTheme = !$isDarkTheme)} />
+<div class="flex justify-end px-4 my-4 md:my-0">
+  <div class="md:absolute top-4 right-4">
+    <LightSwitch on:click={() => ($isDarkTheme = !$isDarkTheme)} />
+  </div>
 </div>
 
 <Header />

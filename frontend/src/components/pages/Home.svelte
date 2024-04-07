@@ -12,18 +12,19 @@
   let customQuestionInterval = 80; // 6-7 seconds shift
 </script>
 
-<div class="absolute top-4 right-4">
-  <LightSwitch on:click={() => ($isDarkTheme = !$isDarkTheme)} />
-</div>
+<div class="flex justify-between px-4 my-4 md:my-0">
+  <div class="md:absolute top-4 left-4">
+    <span>{$timer}s</span>
+  </div>
 
-<div class="absolute top-4 left-4">
-  <span>{$timer}s</span>
+  <div class="md:absolute top-4 right-4">
+    <LightSwitch on:click={() => ($isDarkTheme = !$isDarkTheme)} />
+  </div>
 </div>
-
 <Header />
 
 <div class="flex flex-col">
-  <div class="flex flex-row">
+  <div class="flex flex-col md:flex-row">
     {#if $stage == 'recording'}
       <Transcript transcript={transcriptBatch + currentPendingSentence} />
     {:else}

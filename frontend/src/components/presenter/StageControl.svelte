@@ -245,7 +245,7 @@
   }
 </script>
 
-<div class="flex-1">
+<div class="flex-1 pr-4">
   {#if $stage === 'idle'}
     <div class="stage-start mt-16 flex flex-col items-center">
       <button

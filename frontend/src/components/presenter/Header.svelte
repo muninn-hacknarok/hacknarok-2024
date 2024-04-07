@@ -4,7 +4,7 @@
 
 <div class="flex justify-center my-6">
   <img
-    class="w-96"
+    class="w-96 px-6"
     src={$isDarkTheme
       ? 'assets/logo_dark_theme.png'
       : 'assets/logo_light_theme.png'}

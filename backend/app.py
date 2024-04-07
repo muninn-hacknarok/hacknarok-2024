@@ -3,11 +3,7 @@ from flask_socketio import SocketIO, join_room
 
 import chat
 import uuid
-import logging
 
-
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'

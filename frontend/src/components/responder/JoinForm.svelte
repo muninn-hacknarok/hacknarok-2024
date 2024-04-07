@@ -16,7 +16,7 @@
   function joinRoom() {
     if ($respondentName === '') return;
 
-    state.respondentSocket = io(SOCKET_URL);
+    state.respondentSocket = io(import.meta.env.VITE_SOCKET_URL);
 
     state.respondentSocket?.on('joined_room', () => {
       $respondentStage = 'waiting';

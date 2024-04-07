@@ -9,16 +9,16 @@
   import { stage, timer } from '../../stores/presenterStore';
   let transcriptBatch = '';
   let currentPendingSentence = '';
-  let customQuestionInterval = 30; // 6-7 seconds shift
+  let customQuestionInterval = 80; // 6-7 seconds shift
 </script>
 
 <div class="absolute top-4 right-4">
   <LightSwitch on:click={() => ($isDarkTheme = !$isDarkTheme)} />
 </div>
 
-<!-- <div class="absolute top-4 left-4">
+<div class="absolute top-4 left-4">
   <span>{$timer}s</span>
-</div> -->
+</div>
 
 <Header />
 

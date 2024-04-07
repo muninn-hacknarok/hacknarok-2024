@@ -18,7 +18,7 @@
   import { SOCKET_URL } from '../../const';
   import { SlideToggle } from '@skeletonlabs/skeleton';
 
-  let link = 'http://localhost:3500/';
+  let link = import.meta.env.VITE_CURRENT_URL;
   let roomId = '';
   let connection: StreamingAPIConnection;
   let questionIntervalTimer: number;
@@ -55,7 +55,7 @@
     $storedQuestions = {};
     $connectedUsers = [];
 
-    socket = io(SOCKET_URL);
+    socket = io(import.meta.env.VITE_SOCKET_URL);
     socket.on('room_opened', (data) => {
       console.log('room opened', data);
       handleRoomOpened(data.room);

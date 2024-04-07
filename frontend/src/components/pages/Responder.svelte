@@ -5,12 +5,13 @@
   import Question from '../responder/Question.svelte';
   import { respondentStage } from '../../stores/respondentStore';
   import WaitingForQuestion from '../responder/WaitingForQuestion.svelte';
+  import { isDarkTheme } from '../../stores/globalStore';
 
   export let code: string | null = null;
 </script>
 
 <div class="absolute top-4 right-4">
-  <LightSwitch />
+  <LightSwitch on:click={() => ($isDarkTheme = !$isDarkTheme)} />
 </div>
 
 <Header />

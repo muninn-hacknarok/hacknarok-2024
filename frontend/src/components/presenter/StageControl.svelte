@@ -1,28 +1,75 @@
 <script lang="ts">
-  import { clipboard } from '@skeletonlabs/skeleton';
+  import {
+    clipboard,
+    modalStore,
+    type ModalSettings,
+  } from '@skeletonlabs/skeleton';
   import Icon from '@iconify/svelte';
-  import { stage } from '../../stores/presenterStore';
+  import {
+    connectedUsers,
+    stage,
+    storedQuestions,
+    timer,
+  } from '../../stores/presenterStore';
   import { StreamingAPIConnection, Symbl } from '@symblai/symbl-web-sdk';
   import { ProgressRadial } from '@skeletonlabs/skeleton';
   import { Socket, io } from 'socket.io-client';
   import type { DefaultEventsMap } from '@socket.io/component-emitter';
   import { SOCKET_URL } from '../../const';
+  import { SlideToggle } from '@skeletonlabs/skeleton';
 
   let link = 'http://localhost:3500/';
   let roomId = '';
   let connection: StreamingAPIConnection;
-  let timer: number;
-  let transcriptBatch = '';
+  let questionIntervalTimer: number;
+  export let customQuestionInterval: number;
+  export let transcriptBatch = '';
+  export let currentPendingSentence = '';
   let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
+  let autoConfirm = false;
+  let startTime: number;
+
+  interface Question {
+    id: string;
+    question: string;
+    room: string;
+    correct_response_index: number;
+    answers: string[];
+  }
+
+  interface ResponseEventData {
+    id: string;
+    name: string;
+    response: number;
+  }
 
   async function startTranscript() {
+    startTime = Date.now();
+    setInterval(() => {
+      $timer = Math.round((Date.now() - startTime) / 1000);
+    }, 1000);
+    console.log('start transcript');
     $stage = 'loading';
     transcriptBatch = '';
+    currentPendingSentence = '';
+    $storedQuestions = {};
+    $connectedUsers = [];
 
     socket = io(SOCKET_URL);
     socket.on('room_opened', (data) => {
       console.log('room opened', data);
       handleRoomOpened(data.room);
+    });
+    socket.on('new_response', (data: ResponseEventData) => {
+      console.log('new response', data);
+      handleNewResponse(data);
+    });
+    socket.on('user_joined', (data: { name: string }) => {
+      console.log('user joined', data);
+      onUserJoined(data.name);
+    });
+    socket.on('question_generated', (data: Question) => {
+      handleGeneratedQuestion(data);
     });
     socket.on('connect', function () {
       socket?.emit('open_room');
@@ -44,23 +91,113 @@
 
       // Retrieve real-time transcription from the conversation.
       connection.on('speech_recognition', (speechData) => {
-        const name = speechData.user ? speechData.user.name : 'User';
         const transcript = speechData.punctuated.transcript;
-        // console.log(`${name}: `, speechData);
+        console.log(transcript);
         if (speechData.isFinal) {
           console.log(transcript);
           transcriptBatch += transcript + ' ';
+          currentPendingSentence = '';
+        } else {
+          currentPendingSentence = transcript;
         }
       });
 
-      const questionInterval = 1000 * 60;
-      timer = setInterval(() => {
+      const questionInterval = 1000 * customQuestionInterval;
+      questionIntervalTimer = setInterval(() => {
+        if (transcriptBatch.length < 120) return;
         sendBatch();
         transcriptBatch = '';
+        currentPendingSentence = '';
       }, questionInterval);
     } catch (e) {
       console.error('Transcript api error: ', e);
       $stage = 'idle';
+    }
+  }
+
+  async function handleGeneratedQuestion(question: Question) {
+    if (autoConfirm) {
+      confirmQuestion(question);
+      return;
+    }
+    console.log('question ');
+    const modal: ModalSettings = {
+      type: 'confirm',
+      title: 'Confirm question to ask',
+      body: `Question: <br>
+    ${question.question}<br>
+    Answers:<br>
+    a) ${question.answers[0]} ${question.correct_response_index === 0 ? '(correct)' : ''}<br>
+    b) ${question.answers[1]} ${question.correct_response_index === 1 ? '(correct)' : ''}<br>
+    c) ${question.answers[2]} ${question.correct_response_index === 2 ? '(correct)' : ''}<br>
+    d) ${question.answers[3]} ${question.correct_response_index === 3 ? '(correct)' : ''}
+    `,
+      response: (r: boolean) => {
+        if (!r) return;
+        confirmQuestion(question);
+      },
+    };
+
+    modalStore.trigger(modal);
+  }
+
+  function onUserJoined(name: string) {
+    $connectedUsers = [...$connectedUsers, name];
+  }
+
+  function confirmQuestion(question: Question) {
+    socket?.emit('confirm_question', { id: question.id });
+    $storedQuestions = {
+      ...$storedQuestions,
+      [question.id]: {
+        correctAnswerIndex: question.correct_response_index,
+        goodAnswers: [],
+        wrongAnswers: [],
+        timestamp: new Date(),
+        questionId: question.id,
+        question: question.question,
+      },
+    };
+    const minute = 1000 * 60;
+    setTimeout(() => findAFKUsers(question.id), minute);
+  }
+
+  function findAFKUsers(questionId: string) {
+    const question = $storedQuestions[questionId];
+    const usersSet = new Set();
+    question.goodAnswers.forEach((a) => usersSet.add(a.userName));
+    question.wrongAnswers.forEach((a) => usersSet.add(a.userName));
+    const afkUsers = $connectedUsers
+      .map((user) => (usersSet.has(user) ? null : user))
+      .filter((i): i is string => i !== null);
+
+    console.log('before success rate', question);
+    const successRate =
+      question.goodAnswers.length + question.wrongAnswers.length !== 0
+        ? (question.goodAnswers.length /
+            (question.goodAnswers.length + question.wrongAnswers.length)) *
+          100
+        : null;
+
+    notifyMe('AFK users detected: ' + afkUsers.join(', '));
+    notifyMe(
+      successRate === null
+        ? 'Nobody answered the question'
+        : Math.round(successRate) + '% users answered the question correctly'
+    );
+  }
+
+  function notifyMe(text: string) {
+    if (!('Notification' in window)) {
+      console.log('This browser does not support desktop notification');
+    } else if (Notification.permission === 'granted') {
+      const notification = new Notification(text);
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          const notification = new Notification(text);
+        }
+      });
     }
   }
 
@@ -80,24 +217,43 @@
   async function stopTranscript() {
     await connection?.stopProcessing();
     connection?.disconnect();
-    if (timer) {
-      clearInterval(timer);
+    if (questionIntervalTimer) {
+      clearInterval(questionIntervalTimer);
     }
     $stage = 'idle';
+  }
+
+  function handleNewResponse(response: ResponseEventData) {
+    const correctAnswer = $storedQuestions[response.id].correctAnswerIndex;
+    if (correctAnswer === response.response) {
+      $storedQuestions[response.id].goodAnswers.push({
+        userName: response.name,
+      });
+    } else {
+      $storedQuestions[response.id].wrongAnswers.push({
+        userName: response.name,
+      });
+    }
+    $storedQuestions = structuredClone($storedQuestions);
   }
 </script>
 
 <div class="flex-1">
   {#if $stage === 'idle'}
-    <div class="stage-start mt-16 flex justify-center">
+    <div class="stage-start mt-16 flex flex-col items-center">
       <button
         type="button"
-        class="btn variant-filled-primary m-2"
+        class="btn variant-filled-primary m-2 mb-8"
         on:click={startTranscript}
       >
         <div class="bg-red-500 w-3 h-3 rounded-full"></div>
         <span>Start recording</span>
       </button>
+      <SlideToggle
+        bind:checked={autoConfirm}
+        size="sm"
+        name="question confirmation">Questions auto confirmation</SlideToggle
+      >
     </div>
   {/if}
   {#if $stage === 'loading'}

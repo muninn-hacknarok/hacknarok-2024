@@ -23,7 +23,6 @@
     });
 
     state.respondentSocket?.on('question', (data: QuestionEventData) => {
-      console.log('question received', data);
       $currentQuestion = data;
       $respondentStage = 'answering';
     });
@@ -31,7 +30,7 @@
     state.respondentSocket?.on('connect', () => {
       state.respondentSocket?.emit('join_room', {
         room: roomId,
-        name,
+        name: $respondentName,
       });
     });
   }
